@@ -3,7 +3,7 @@ import os
 
 schema = []
 tables = []
-operations = ["sum", "average", "min", "max"]
+operations = ["sum", "average", "min", "max", "distinct"]
 
 
 def init_engine():
@@ -131,7 +131,9 @@ def print_data(cols, tno):
         print row[-1]
     return
 
-
+def distinct_data(cols,tno):
+    return
+'''
 def process(a):
     global tables
     if 1:
@@ -154,6 +156,23 @@ def process(a):
                     else:
                         col_op_query = 1
                         col_single_op(find_column(tno, col_name), tno, operations.index(a.columns[0].split('(')[0]))
+                    '''
+                    else:
+                        if a.columns[0].split('(')[0]== "distinct":
+                            cols = []
+                            for x in a.columns:
+                                col_name = a.columns[0].split('(')[1][:-1]
+                                op_name = a.columns[0].split('(')[0]
+                                if find_column(tno,col_name) == -1:
+                                    print "one or more columns not found."
+                                    col_not_found = -1
+                                    error_found = -1
+                                else:
+                        else:
+
+                            col_op_query = 1
+                            col_single_op(find_column(tno, col_name), tno, operations.index(a.columns[0].split('(')[0]))
+                    '''
                 else:
                     print "table no " + str(tno)
                     for col in a.columns:
@@ -180,8 +199,32 @@ def process(a):
     else:
         print "where condition is not there"
     return
+'''
+
+def check_tables(tlist):
+    global tables
+    for table in tlist:
+        if table not in tables:
+            print "Query cannot be processed. One or more tables is missing."
+            return -1
+    return 1
 
 
+def check_columns(a):
+    for col in a.columns:
+        found = 0
+        for table in a.tables:
+            if  find_column(find_table(table),col) == -1:
+                found = 1
+                break
+        if found == 0
+            print "Query cannot be processed. One or more columns is not found."
+            return -1
+def process(a):
+    if not check_tables(a.tables) == -1 and not check_columns(a) == -1:
+        m = get_data(a)
+        print_data(m)
+    return
 def run_engine():
     prompt = ">>>  "
     while 1:
