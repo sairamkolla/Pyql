@@ -4,8 +4,14 @@ import copy
 
 schema = []
 tables = []
-operations = ["sum", "average", "min", "max", "distinct"]
+operations = ["sum", "average", "min", "max"]
 
+def is_int(i):
+    try:
+        i = int(i)
+        return 1
+    except:
+        return 0
 
 def init_engine():
     ot = open("content/welcome.txt", "r")
@@ -32,7 +38,12 @@ def find_table(table_name):
 
 def find_column(tno, column_name):
     global schema
+
     table = schema[tno][1:]
+    if len(column_name.split('(')) == 2:
+        column_name  = column_name.split('(')[1][:-1]
+    if len(column_name.split('.')) == 2:
+        column_name  = column_name.split('.')[1]
     for col in table:
         if col == column_name:
             return table.index(col)
@@ -40,6 +51,8 @@ def find_column(tno, column_name):
 
 
 def sum_col(colno, tno):
+    #print "sum operation"
+    #print "colno ",colno
     global tables
     sum_value = 0
     x = open(tables[tno] + '.csv', 'r')
@@ -51,6 +64,8 @@ def sum_col(colno, tno):
 
 
 def average_col(colno, tno):
+    #print "average operation"
+    #print "colno ",colno
     global tables
     sum_value = 0
     x = open(tables[tno] + '.csv', 'r')
@@ -62,6 +77,8 @@ def average_col(colno, tno):
 
 
 def min_col(colno, tno):
+    #print "min operation"
+    #print "colno ",colno
     global tables
     min_value = 10000000000
     x = open(tables[tno] + '.csv', 'r')
@@ -75,6 +92,8 @@ def min_col(colno, tno):
 
 
 def max_col(colno, tno):
+    #print "max operation"
+    #print "colno ",colno
     global tables
     max_value = -10000000000
     x = open(tables[tno] + '.csv', 'r')
@@ -117,10 +136,11 @@ def rename_where(where_condition,a):
                     pass
                 else:
                     col = cns[i][j]
-                    for table in a.tables:
-                        if not find_column(find_table(table), col) == -1:
-                            cns[i][j] = table + '.' + col
-                            break
+                    if not is_int(col):
+                        for table in a.tables:
+                            if not find_column(find_table(table), col) == -1:
+                                cns[i][j] = table + '.' + col
+                                break
         #print cns
         return cns
     return [-1]
@@ -140,13 +160,25 @@ def evaluate(row,ref_list,where_cn):
         c1 = where_cn[0]
         c2 = where_cn[2]
         op = where_cn[1]
+        if is_int(c1[2]):
+            x = calculator(row[ref_list.index(c1[0])], c1[2], c1[1])
+        else:
+            x = calculator(row[ref_list.index(c1[0])], row[ref_list.index(c1[2])], c1[1])
+        if is_int(c2[2]):
+            y = calculator(row[ref_list.index(c2[0])], c2[2], c2[1])
+        else:
+            y = calculator(row[ref_list.index(c2[0])], row[ref_list.index(c2[2])], c2[1])
+
         if op == 'or':
-            return calculator(row[ref_list.index(c1[0])],row[ref_list.index(c1[2])],c1[1]) or calculator(row[ref_list.index(c2[0])],row[ref_list.index(c2[2])],c2[1])
+            return x or y
         elif op == 'and':
-            return calculator(row[ref_list.index(c1[0])], row[ref_list.index(c1[2])], c1[1]) and calculator(row[ref_list.index(c2[0])], row[ref_list.index(c2[2])], c2[1])
+            return x and y
     else:
         c1 = where_cn[0]
-        return calculator(row[ref_list.index(c1[0])],row[ref_list.index(c1[2])],c1[1])
+        if is_int(c1[2]):
+            return calculator(row[ref_list.index(c1[0])], c1[2], c1[1])
+        else:
+            return calculator(row[ref_list.index(c1[0])],row[ref_list.index(c1[2])],c1[1])
     return 1
 
 def print_data2(query,m,cols_list,ref_list,where_cn):
@@ -162,7 +194,7 @@ def print_data2(query,m,cols_list,ref_list,where_cn):
             print row[ref_list.index(cols_list[-1])]
     else:
 
-        print "where condition is there"
+        #print "where condition is there"
         for row in cols_list[:-1]:
             print row + ',',
         print cols_list[-1]
@@ -176,7 +208,28 @@ def print_data2(query,m,cols_list,ref_list,where_cn):
             #print where_cn
 
     return
-def distinct_data(cols,tno):
+def distinct_data(query,m,cols_list,ref_list):
+    f = open("temp.txt","w")
+    for row in cols_list[:-1]:
+        print row + ',',
+    print cols_list[-1]
+    for row in m:
+        for col in cols_list[:-1]:
+            f.write(row[ref_list.index(col)] + ',')
+        f.write(row[ref_list.index(cols_list[-1])]+'\n')
+    f.close()
+
+    f = open("temp.txt","r")
+    f = f.read()
+    f = f.split('\n')
+    done =[]
+    for i in f:
+        if not i in done:
+            if len(i):
+                print i
+                done.append(i)
+    return
+
     return
 
 
@@ -197,6 +250,8 @@ def check_columns(a):
         return 1
     if not a.columns[0] == "*":
         for col in a.columns:
+            if len(col.split('(')) == 2:
+                col = col.split('(')[1][:-1]
             if len(col.split('.')) ==2:
                 #print col.split('.')
                 col_temp = col.split('.')[1]
@@ -227,6 +282,8 @@ def check_columns(a):
             #print "checking ",i," condition"
             for j in [0,2]:
                 temp = cns[i][j]
+                if is_int(temp):
+                    break
                 if len(temp.split('.')) == 2:
                     col = temp.split('.')[1]
                     table = temp.split('.')[0]
@@ -286,6 +343,8 @@ def rename_columns(a):
     global tables
     cols = []
     for col in a.columns:
+        if len(col.split('(')) == 2:
+            col = col.split('(')[1][:-1]
         if len(col.split('.')) == 2:
             cols.append(col)
         else:
@@ -297,6 +356,7 @@ def rename_columns(a):
 
 def process(a):
     if not check_tables(a.tables) == -1 and not check_columns(a) == -1:
+
         m,ref_list = get_data(a)
         if len(a.columns) == 1 and a.columns[0] == "*":
             cols_list = ref_list
@@ -305,14 +365,18 @@ def process(a):
         temp  = copy.deepcopy(a.where)[0]
 
         where_cn = rename_where(temp,a)
-        print a
+        #print a
         #print m
-        print where_cn
-        print ref_list
-        print cols_list
+        #print where_cn
+        #print ref_list
+        #print cols_list
         #print len(m)
-
-        print_data2(a,m,cols_list,ref_list,where_cn)
+        if len(a.columns) == 1 and a.columns[0].split('(')[0] in operations:
+            col_single_op(find_column(find_table(a.tables[0]),a.columns[0]),find_table(a.tables[0]),operations.index(a.columns[0].split('(')[0]))
+        elif a.columns[0].split('(')[0] == "distinct":
+            distinct_data(a,m,cols_list,ref_list)
+        else:
+            print_data2(a,m,cols_list,ref_list,where_cn)
     return
 def run_engine():
     prompt = ">>>  "
