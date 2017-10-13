@@ -16,7 +16,7 @@ def is_int(i):
 def init_engine():
     ot = open("content/welcome.txt", "r")
     print ot.read(),
-    l = open("metadata.txt", "r")
+    l = open("content/metadata.txt", "r")
     l = l.read()
     l = l.split("<begin_table>")
     for i in l:
@@ -55,7 +55,7 @@ def sum_col(colno, tno):
     #print "colno ",colno
     global tables
     sum_value = 0
-    x = open(tables[tno] + '.csv', 'r')
+    x = open("database/"+ tables[tno] + '.csv', 'r')
     x = x.read()
     x = x.split('\n')
     for i in x:
@@ -68,7 +68,7 @@ def average_col(colno, tno):
     #print "colno ",colno
     global tables
     sum_value = 0
-    x = open(tables[tno] + '.csv', 'r')
+    x = open("database/"+tables[tno] + '.csv', 'r')
     x = x.read()
     x = x.split('\n')
     for i in x:
@@ -81,7 +81,7 @@ def min_col(colno, tno):
     #print "colno ",colno
     global tables
     min_value = 10000000000
-    x = open(tables[tno] + '.csv', 'r')
+    x = open("database/"+tables[tno] + '.csv', 'r')
     x = x.read()
     x = x.split('\n')
     for i in x:
@@ -96,7 +96,7 @@ def max_col(colno, tno):
     #print "colno ",colno
     global tables
     max_value = -10000000000
-    x = open(tables[tno] + '.csv', 'r')
+    x = open("database/"+tables[tno] + '.csv', 'r')
     x = x.read()
     x = x.split('\n')
     for i in x:
@@ -209,7 +209,7 @@ def print_data2(query,m,cols_list,ref_list,where_cn):
 
     return
 def distinct_data(query,m,cols_list,ref_list):
-    f = open("temp.txt","w")
+    f = open("content/temp.txt","w")
     for row in cols_list[:-1]:
         print row + ',',
     print cols_list[-1]
@@ -219,7 +219,7 @@ def distinct_data(query,m,cols_list,ref_list):
         f.write(row[ref_list.index(cols_list[-1])]+'\n')
     f.close()
 
-    f = open("temp.txt","r")
+    f = open("content/temp.txt","r")
     f = f.read()
     f = f.split('\n')
     done =[]
@@ -316,7 +316,7 @@ def get_data(a):
     global tables
     m = []
     cols_list = []
-    temp = open(a.tables[0] + '.csv','r')
+    temp = open("database/"+a.tables[0] + '.csv','r')
     temp = temp.read()
     temp = temp.split('\n')
     for x in temp:
